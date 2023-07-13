@@ -5,13 +5,9 @@ from pathlib import Path
 
 import tatsu
 
-from .grammar import bashParser
-
 from fleks.util import lme, typing  # noqa
 
-
-# from pynchon.util.text import loads
-
+from .grammar import bashParser
 
 DEBUG = True  # False
 LOGGER = lme.get_logger(__name__)
@@ -48,10 +44,6 @@ class Semantics:
             out = "\n".join(out)
             return f"'{out}'"
         return ast
-
-    # def group_command(self, ast):
-    #     LOGGER.warning(f"group_command: {ast}")
-    #     return ast
 
     def word(self, ast):
         LOGGER.warning(f"word: {ast}")
@@ -138,12 +130,7 @@ class Semantics:
 
 
 def fmt(text, filename="?"):
-    """
-    :param text: argument
-    :param filename: argument  (Default value = ?)
-    :type text: text
-    :type filename: filename='?'
-    """
+    """"""
     semantics = Semantics()
     parser = bashParser()
     try:
