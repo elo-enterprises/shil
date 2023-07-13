@@ -1,4 +1,4 @@
-""" setup.py for shfmt
+""" setup.py for schelp
 """
 import os
 
