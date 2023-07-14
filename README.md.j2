@@ -1,7 +1,7 @@
 <table>
   <tr>
     <td colspan=2><strong>
-    shimport
+    shil
       </strong>&nbsp;&nbsp;&nbsp;&nbsp;
       <small><small>
       </small></small>
@@ -10,10 +10,12 @@
   <tr>
     <td width=15%><img src=img/icon.png style="width:150px"></td>
     <td>
-    Import utilities for python
+    Shell-helpers for python.  Includes helpers for subprocess invocation, shell-formatters / pretty-printers, and more.
     </td>
   </tr>
 </table>
+
+---------------------------------------------------------------------------------
 
 {{markdown_toc(__template__, level=2)}}
 
@@ -21,14 +23,24 @@
 
 ## Overview
 
+shil is Dutch for "shell", and a library full of shell-helpers.
+
+---------------------------------------------------------------------------------
+
+## Features
+
+* Helpers for subprocess invocation
+* Shell-formatters / pretty-printers
+* A somewhat complete parser / grammer for shell code
+
 ---------------------------------------------------------------------------------
 
 ## Installation
 
-See [pypi](https://pypi.org/project/schelp/) for available releases.
+See [pypi](https://pypi.org/project/shil/) for available releases.
 
 ```
-pip install schelp
+pip install shil
 ```
 
 ---------------------------------------------------------------------------------
@@ -36,3 +48,37 @@ pip install schelp
 ## Usage
 
 ---------------------------------------------------------------------------------
+
+See also:
+
+* [the unit-tests](tests/units) for some examples of library usage
+* [the smoke-tests](tests/smoke/test.sh) for example usage of stand-alone scripts
+
+```
+from shil import invoke, Invocation
+
+# Working with models for Invocation/InvocationResponse:
+req = cmd = Invocation(command='ls /tmp')
+resp = cmd()
+print(resp.stdout)
+
+# More functional approach:
+resp = invoke(command='ls /tmp')
+
+# Loading data when command-output is JSON
+req = cmd = Invocation(command='echo {"foo":"bar"}')
+resp = cmd()
+print(resp.data)
+assert type(resp.data)==type({})
+
+# Uses pydantic, so serialization is straightforward
+import json
+json.loads(resp.json())
+json.loads(req.json())
+for k,v in req.dict().items():
+  assert getattr(resp,k)==v
+
+# Rich console output for Invocations and InvocationResponse
+import rich
+rich.print(resp)
+```

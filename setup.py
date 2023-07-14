@@ -1,4 +1,4 @@
-""" setup.py for schelp
+""" setup.py for shil
 """
 import os
 

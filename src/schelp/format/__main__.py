@@ -1,18 +1,21 @@
-""" shil.__main__
+""" shil.format.__main__
 """
-
-from fleks import app, cli
+from fleks import cli
 from fleks.util import lme
+
+from shil.console import Syntax
 
 from . import fmt
 
 LOGGER = lme.get_logger(__name__)
 
 
-@cli.click.argument("filename")
+@cli.click.argument(
+    "filename",
+)
 @cli.click.command
 def entry(filename: str = "/dev/stdin"):
-    """CLI tool for shil
+    """CLI tool for shfmt
     :param filename: str:  (Default value = '/dev/stdin')
     """
     if filename == "-":
@@ -29,7 +32,7 @@ def entry(filename: str = "/dev/stdin"):
     print(formatted)
 
     lme.CONSOLE.print(
-        app.Syntax(
+        Syntax(
             fmt(text, filename=filename),
             "bash",
             word_wrap=True,

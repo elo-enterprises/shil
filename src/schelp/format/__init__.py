@@ -1,6 +1,6 @@
-""" shil
+""" shil.format
 """
-import json
+import json as modjson
 from pathlib import Path
 
 import tatsu
@@ -8,15 +8,13 @@ from fleks.util import lme
 
 from .grammar import bashParser
 
-from .format import shfmt  # noqa
-from .models import Invocation  # noqa
-from .util import invoke  # noqa
-
 DEBUG = True  # False
 LOGGER = lme.get_logger(__name__)
 
 
 class Semantics:
+    """ """
+
     def strict_word(self, ast):
         LOGGER.warning(f"strict_word: {ast}")
         return ast
@@ -29,24 +27,25 @@ class Semantics:
         return ast
 
     def squote(self, ast):
-        from json import loads
-
         LOGGER.warning(f"squote: {ast}")
         ast = ast.strip().lstrip()
         is_json = ast.startswith("{") and ast.strip().endswith("}")
         if is_json:
             try:
-                # tmp = loads.json5(ast)
-                tmp = loads(ast)
+                tmp = modjson.loads(ast)
             except:
                 is_json = False
             else:
                 LOGGER.critical(f"found json: {tmp}")
-                ast = json.dumps(tmp, indent=2)
+                ast = modjson.dumps(tmp, indent=2)
             out = [x + " \\" for x in ast.split("\n")]
             out = "\n".join(out)
             return f"'{out}'"
         return ast
+
+    # def group_command(self, ast):
+    #     LOGGER.warning(f"group_command: {ast}")
+    #     return ast
 
     def word(self, ast):
         LOGGER.warning(f"word: {ast}")
@@ -132,8 +131,8 @@ class Semantics:
         return str(ast)
 
 
-def fmt(text, filename="?"):
-    """"""
+def shfmt(text, filename="?"):
+    """ """
     semantics = Semantics()
     parser = bashParser()
     try:
@@ -156,6 +155,3 @@ def fmt(text, filename="?"):
         # tail=out.copy()
         tail = "\n  ".join(out)
         return f"{head} {tail}"
-
-
-bash_fmt = fmt

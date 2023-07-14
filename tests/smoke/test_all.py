@@ -1,2 +1,2 @@
 def test_imports():
-    import schelp # noqa
+    import shil  # noqa

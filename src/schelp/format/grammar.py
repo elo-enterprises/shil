@@ -1,4 +1,4 @@
-""" shil.grammar
+""" shil.format.grammar
 """
 GRAMMAR = r"""@@grammar::bash
 @@comments :: /\(\*.*?\*\)/
