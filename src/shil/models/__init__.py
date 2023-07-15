@@ -6,6 +6,7 @@ import subprocess
 
 import pydantic
 from fleks.util import lme
+
 from shil.format import shfmt
 from shil.console import Panel, Syntax, Text
 

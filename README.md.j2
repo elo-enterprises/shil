@@ -10,7 +10,7 @@
   <tr>
     <td width=15%><img src=img/icon.png style="width:150px"></td>
     <td>
-    Shell-helpers for python.  Includes helpers for subprocess invocation, shell-formatters / pretty-printers, and more.
+    Shell-util library for python.  Includes helpers for subprocess invocation, shell-formatters / pretty-printers, and more.
     </td>
   </tr>
 </table>
@@ -23,15 +23,14 @@
 
 ## Overview
 
-shil is Dutch for "shell", and a library full of shell-helpers.
+The `shil` library provides various shell-utilities for python.
 
----------------------------------------------------------------------------------
-
-## Features
+### Features
 
 * Helpers for subprocess invocation
 * Shell-formatters / pretty-printers
-* A somewhat complete parser / grammer for shell code
+* A somewhat usable parser / grammer for bash
+* Support or [rich protocols](#placeholder)
 
 ---------------------------------------------------------------------------------
 
@@ -55,24 +54,24 @@ See also:
 * [the smoke-tests](tests/smoke/test.sh) for example usage of stand-alone scripts
 
 ```
-from shil import invoke, Invocation
+import shil 
+import json
 
 # Working with models for Invocation/InvocationResponse:
-req = cmd = Invocation(command='ls /tmp')
+req = cmd = shil.Invocation(command='ls /tmp')
 resp = cmd()
 print(resp.stdout)
 
 # More functional approach:
-resp = invoke(command='ls /tmp')
+resp = shil.invoke('ls /tmp')
 
 # Loading data when command-output is JSON
-req = cmd = Invocation(command='echo {"foo":"bar"}')
+req = cmd = shil.Invocation(command='echo {"foo":"bar"}')
 resp = cmd()
 print(resp.data)
 assert type(resp.data)==type({})
 
 # Uses pydantic, so serialization is straightforward
-import json
 json.loads(resp.json())
 json.loads(req.json())
 for k,v in req.dict().items():
