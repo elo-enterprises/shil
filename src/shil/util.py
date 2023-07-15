@@ -1,8 +1,14 @@
 """ shil.util
 """
+import functools
+
 from fleks.util import lme
 
 LOGGER = lme.get_logger(__name__)
+
+
+def Runner(**kwargs):
+    return functools.partial(invoke, **kwargs)
 
 
 def invoke(*args, **kwargs):
@@ -16,6 +22,6 @@ def invoke(*args, **kwargs):
             kwargs.update(command=command)
         else:
             raise ValueError("expected args[0] would be `command`!")
-    LOGGER.critical(kwargs)
+    # LOGGER.critical(kwargs)
     cmd = Invocation(**kwargs)
     return cmd()

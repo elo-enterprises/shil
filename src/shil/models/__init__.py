@@ -1,73 +1,110 @@
 """ shil.models
 """
 import os
+import json
 import typing
 import subprocess
 
 import pydantic
 from fleks.util import lme
 
-from shil.format import shfmt
-from shil.console import Panel, Syntax, Text
+from shil import console
+from shil.parser import shfmt
 
 LOGGER = lme.get_logger(__name__)
 
 Field = pydantic.Field
 
-
-class BaseModel(pydantic.BaseModel):
-    """ """
-
-    def update(self, **kwargs):
-        return self.__dict__.update(**kwargs)
-
-    class Config:
-        arbitrary_types_allowed = True
-        # frozen = True
+from .base import BaseModel
 
 
 class Invocation(BaseModel):
-    command: typing.Optional[str] = Field()
-    stdin: typing.Optional[str] = Field(help="stdin to send to command")
-    strict: bool = Field(default=False, help="Fail if command fails")
-    shell: typing.Optional[bool] = Field(help="Fail if command fails")
-    interactive: bool = Field(default=False, help="Interactive mode")
+    command: typing.Optional[str] = Field(help="")
+    stdin: typing.Optional[str] = Field(default=None, help="stdin to send to command")
+    strict: bool = Field(
+        default=False,
+        help="Fail if command fails",
+    )
+    shell: typing.Optional[bool] = Field(
+        help="Fail if command fails",
+    )
+    interactive: bool = Field(
+        default=False,
+        help="Interactive mode",
+    )
     large_output: bool = Field(
         default=False, help="Flag for indicating that output is huge"
     )
-    log_command: bool = Field(
-        default=True,
-        help="Flag indicating whether command should be logged when it is run",
+    command_logger: typing.Optional[typing.Any] = Field(
+        default=None,
+        help="",
     )
-    environment: dict = Field(default={})
-    log_stdin: bool = Field(default=True)
+    output_logger: typing.Optional[typing.Any] = Field(
+        default=None,
+        help="",
+    )
+    environment: dict = Field(
+        default={},
+        help="",
+    )
+    # log_stdin: bool = Field(default=True)
     system: bool = Field(help='Execute command in "system" mode', default=False)
     load_json: bool = Field(help="Load JSON from output", default=False)
 
-    def __rich_console__(self, console, options):  # noqa
-        """
-        https://rich.readthedocs.io/en/stable/protocol.html
-        """
-        yield f"[dim]$[/dim] [b]{self.command}[/b]"
+    @property
+    def system(self):
+        """ """
+        tmp = self.__dict__.get("system", False)
+        if tmp:
+            if self.stdin or self.interactive:
+                err = f"{self} `system` cannot be used with `stdin`/`interactive`"
+                LOGGER.critical(err)
+                raise ValueError(err)
+                # assert not self.stdin and not self.interactive
 
     def __call__(self):
         """ """
-        #     if self.log_command:
-        #         msg = f"running command: (system={self.system})\n  {self.command}"
-        #         LOGGER.warning(msg)
-        LOGGER.warning(self.command)
+        if self.command_logger:
+            tmp_sys = f"system={self.system}" if self.system else ""
+            tmp_str = f"strict={self.strict}" if self.strict else ""
+            tmp = " ".join([tmp_sys, tmp_str]).strip() or ".."
+            tmp = f"({tmp})"
+            msg = f"Running command: {tmp}\n  {self.command}"
+            self.command_logger(msg)
         result = InvocationResult(**self.dict())
 
         if self.system:
-            assert not self.stdin and not self.interactive
-            error = os.system(self.command)
+            # FIXME: record `pid` and support `environment`
+            
+            # proc = subprocess.call(
+            proc = subprocess.run(
+                self.command,
+                shell=True,
+                # capture_output=True,
+            )
+            # result.update(
+            #     stderr=proc.stderr.decode("utf-8"),
+            #     stdout=proc.stdout.decode("utf-8"),
+            # )
+            # error = os.system(self.command)
+            # import sys 
+            # proc = subprocess.Popen(
+            #     self.command, 
+            #     # stdout=sys.stdout,
+            #     stdout=subprocess.PIPE
+            #     )
+            # stdout=""
+            # for c in iter(lambda: proc.stdout.read(1), b""):
+            #     sys.stdout.buffer.write(c)
+            #     stdout+=c
+            error = proc.returncode > 0
             result.update(
                 failed=bool(error),
                 failure=bool(error),
                 success=not bool(error),
                 succeeded=not bool(error),
-                stdout="<os.system>",
-                stdin="<os.system>",
+                stdout=stdout, #"<os.system>",
+                # stdin="<os.system>",
             )
             return result
 
@@ -76,8 +113,9 @@ class Invocation(BaseModel):
             env={**{k: v for k, v in os.environ.items()}, **self.environment},
         )
         if self.stdin:
-            msg = "command will receive pipe:\n{}"
-            self.log_stdin and LOGGER.debug(msg.format(self.stdin))
+            self.command_logger and self.command_logger(
+                f"Command will receive pipe:\n{self.stdin}"
+            )
             exec_kwargs.update(
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
@@ -105,11 +143,13 @@ class Invocation(BaseModel):
             return result
         else:
             if not self.interactive:
-                exec_kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                exec_kwargs.update(
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
             exec_cmd = subprocess.Popen(self.command, **exec_kwargs)
             exec_cmd.wait()
         if exec_cmd.stdout:
-            exec_cmd.hstdout = exec_cmd.stdout
             result.update(
                 stdout=(
                     "<LargeOutput>"
@@ -117,15 +157,13 @@ class Invocation(BaseModel):
                     else exec_cmd.stdout.read().decode("utf-8")
                 )
             )
-            exec_cmd.hstdout.close()
+            exec_cmd.stdout.close()
         else:
             exec_cmd.stdout = "<Interactive>"
             result.update(stdout="<Interactive>")
         if exec_cmd.stderr:
-            exec_cmd.hstderr = exec_cmd.stderr
-            exec_cmd.stderr = exec_cmd.stderr.read().decode("utf-8")
-            exec_cmd.hstderr.close()
-            result.update(stderr=exec_cmd.stderr)
+            result.update(stderr=exec_cmd.stderr.read().decode("utf-8"))
+            exec_cmd.stderr.close()
         result.pid = exec_cmd.pid
         result.failed = exec_cmd.returncode > 0
         result.succeeded = not result.failed
@@ -134,22 +172,43 @@ class Invocation(BaseModel):
         result.data = loaded_json = None
         if self.load_json:
             if result.failed:
-                err = f"{self} did not succeed; cannot return JSON from failure"
+                err = f"Command @ {self.command} did not succeed; cannot return JSON from failure!"
                 LOGGER.critical(err)
                 LOGGER.critical(result.stderr)
                 raise RuntimeError(err)
-            import json
 
             try:
                 loaded_json = json.loads(result.stdout)
             except (json.decoder.JSONDecodeError,) as exc:
                 loaded_json = dict(error=str(exc))
+
         if self.strict and not result.succeeded:
             LOGGER.critical(f"Invocation failed and strict={self.strict}")
-            # raise InvocationError
-            LOGGER.critical(result.stderr)
-            raise RuntimeError(result.stderr)
+            LOGGER.critical(f"\n{result.stdout}")
+            LOGGER.critical(f"\n{result.stderr}")
+            raise RuntimeError()
+        if self.output_logger:
+            self.output_logger(result)
         return result
+
+    def __rich_console__(self, _console, options):  # noqa
+        """
+        https://rich.readthedocs.io/en/stable/protocol.html
+        """
+        fmt = shfmt(self.command)
+        extras = [
+            f"[yellow]{attr}=1" if getattr(self, attr, None) else ""
+            for attr in "system stdin interactive strict".split()
+        ]
+        extras = " ".join(extras)
+        yield self.command
+        yield console.Panel(
+            f"[bold gold3]$ [dim italic pale_green3]{fmt}",
+            title=(f"{self.__class__.__name__} {extras}"),
+            title_align="left",
+            style=console.Style(bgcolor="grey19"),
+            subtitle=console.Text("not executed yet", style="yellow"),
+        )
 
 
 class InvocationResult(Invocation):
@@ -165,7 +224,7 @@ class InvocationResult(Invocation):
     return_code: int = Field(default=-1, help="")
     pid: int = Field(default=-1, help="")
 
-    def __rich_console__(self, console, options):  # noqa
+    def __rich_console__(self, _console, options):  # noqa
         """
         https://rich.readthedocs.io/en/stable/protocol.html
         """
@@ -174,23 +233,18 @@ class InvocationResult(Invocation):
             if self.succeeded is None:
                 return "??"
             else:
-                return "[cyan]=> [green]ok" if self.succeeded else "[red]failed"
+                return "[cyan]🠦 [green]ok" if self.succeeded else "[red]failed"
 
         fmt = shfmt(self.command)
-        syntax = Syntax(
-            f"{fmt}",
-            # f"[dim]$[/dim] [b]{fmt}[/b]",
-            "bash",
-            word_wrap=True,
-            line_numbers=False,
-        )
-        yield Panel(
-            syntax,
+        stcol = "[bold pale_green3]" if self.succeeded else "[red3]"
+        yield console.Panel(
+            f"[bold gold3]$ [dim]{fmt.strip()}\n{stcol} 🠦 [dim italic pale_green3]{self.stdout}",
             title=(
                 f"{self.__class__.__name__} from " f"pid {self.pid} {status_string()}"
             ),
+            style=console.Style(bgcolor="grey19"),
             title_align="left",
-            subtitle=Text("✔", style="green")
+            subtitle=console.Text("✔", style="green")
             if self.success
-            else Text("❌", style="red"),
+            else console.Text("❌", style="red"),
         )
