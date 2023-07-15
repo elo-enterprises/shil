@@ -4,9 +4,8 @@
 import os
 import tempfile
 
-from rich.console import Console
-
 from shil import Invocation, invoke, models
+from rich.console import Console
 
 console = Console()
 
