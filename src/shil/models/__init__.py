@@ -75,7 +75,7 @@ class Invocation(BaseModel):
 
         if self.system:
             # FIXME: record `pid` and support `environment`
-            
+
             # proc = subprocess.call(
             proc = subprocess.run(
                 self.command,
@@ -87,9 +87,9 @@ class Invocation(BaseModel):
             #     stdout=proc.stdout.decode("utf-8"),
             # )
             # error = os.system(self.command)
-            # import sys 
+            # import sys
             # proc = subprocess.Popen(
-            #     self.command, 
+            #     self.command,
             #     # stdout=sys.stdout,
             #     stdout=subprocess.PIPE
             #     )
@@ -103,7 +103,8 @@ class Invocation(BaseModel):
                 failure=bool(error),
                 success=not bool(error),
                 succeeded=not bool(error),
-                stdout=stdout, #"<os.system>",
+                stdout=proc.stdout.decode("utf-8"),
+                # stdout="<os.system>",
                 # stdin="<os.system>",
             )
             return result
