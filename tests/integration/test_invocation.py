@@ -1,21 +1,36 @@
 """
     test-suite: integration
 """
-import os
+import os  # noqa
 import tempfile
 
 from rich.console import Console
 
 from shil import Invocation, invoke, models
 
+import pytest  # noqa
+
+
 console = Console()
 
 
-def test_rich_console():
+def test_rich_console_command():
+    console.print()
+    cmd = Invocation(
+        command="echo testing",
+        system=True,
+        # log_command=True, use_log=console.print,
+    )
+    console.print(cmd)
+    # sys.stdin.readline()
+
+
+def test_rich_console_command_output():
     cmd = Invocation(command="echo testing")
     resp = cmd()
-    console.print(cmd)
+    console.print()
     console.print(resp)
+    # sys.stdin.readline()
 
 
 def test_Invocation_is_lazy():
