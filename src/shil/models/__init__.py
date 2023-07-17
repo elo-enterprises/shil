@@ -60,7 +60,26 @@ class Invocation(BaseModel):
                 err = f"{self} `system` cannot be used with `stdin`/`interactive`"
                 LOGGER.critical(err)
                 raise ValueError(err)
-                # assert not self.stdin and not self.interactive
+
+    def __rich_console__(self, _console, options):  # noqa
+        """
+        https://rich.readthedocs.io/en/stable/protocol.html
+        """
+        fmt = shfmt(self.command)
+        extras = [
+            f"[yellow]{attr}=1" if getattr(self, attr, None) else ""
+            for attr in "system stdin interactive strict".split()
+        ]
+        extras = " ".join(extras)
+        yield self.command
+        yield console.Panel(
+            f"[bold gold3]$ [dim italic pale_green3]{fmt}",
+            title=(f"{self.__class__.__name__} {extras}"),
+            title_align="left",
+            style=console.Style(bgcolor="grey19"),
+            subtitle=console.Text("not executed yet", style="yellow"),
+        )
+        # assert not self.stdin and not self.interactive
 
     def __call__(self):
         """ """
@@ -191,25 +210,6 @@ class Invocation(BaseModel):
         if self.output_logger:
             self.output_logger(result)
         return result
-
-    def __rich_console__(self, _console, options):  # noqa
-        """
-        https://rich.readthedocs.io/en/stable/protocol.html
-        """
-        fmt = shfmt(self.command)
-        extras = [
-            f"[yellow]{attr}=1" if getattr(self, attr, None) else ""
-            for attr in "system stdin interactive strict".split()
-        ]
-        extras = " ".join(extras)
-        yield self.command
-        yield console.Panel(
-            f"[bold gold3]$ [dim italic pale_green3]{fmt}",
-            title=(f"{self.__class__.__name__} {extras}"),
-            title_align="left",
-            style=console.Style(bgcolor="grey19"),
-            subtitle=console.Text("not executed yet", style="yellow"),
-        )
 
 
 class InvocationResult(Invocation):

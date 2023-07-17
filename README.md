@@ -34,7 +34,8 @@ The `shil` library provides various shell-utilities for python.
 * Helpers for subprocess invocation
 * Shell-formatters / pretty-printers
 * A somewhat usable parser / grammer for bash
-* Support or [rich protocols](#placeholder)
+* Console support for [rich](https://rich.readthedocs.io/en/stable/index.html) & [rich protocols](https://rich.readthedocs.io/en/stable/protocol.html)
+
 
 ---------------------------------------------------------------------------------
 
@@ -49,8 +50,6 @@ pip install shil
 ---------------------------------------------------------------------------------
 
 ## Usage
-
----------------------------------------------------------------------------------
 
 See also:
 
@@ -84,4 +83,16 @@ for k,v in req.dict().items():
 # Rich console output for Invocations and InvocationResponse
 import rich
 rich.print(resp)
+
+# Pass in any loggers you want to use
+from rich.console import Console 
+console = Console(stderr=True)
+shil.invoke('ls /tmp', command_logger=console.log)
+
+# Instantiate a `Runner` to stay DRY
+console=Console(stderr=True)
+runner = shil.Runner(
+  output_logger=console.log,
+  command_logger=console.log)
+runner('ls /tmp')
 ```
