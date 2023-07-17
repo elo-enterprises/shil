@@ -3,6 +3,7 @@
 import os
 import json
 import typing
+import textwrap
 import subprocess
 
 import pydantic
@@ -11,15 +12,18 @@ from fleks.util import lme
 from shil import console
 from shil.parser import shfmt
 
+from .base import BaseModel
+
 LOGGER = lme.get_logger(__name__)
 
 Field = pydantic.Field
 
-from .base import BaseModel
-
 
 class Invocation(BaseModel):
-    command: typing.Optional[str] = Field(help="")
+    command: typing.Optional[str] = Field(
+        help="Command to run",
+        required=True,
+    )
     stdin: typing.Optional[str] = Field(default=None, help="stdin to send to command")
     strict: bool = Field(
         default=False,
@@ -43,23 +47,33 @@ class Invocation(BaseModel):
         default=None,
         help="",
     )
+    output_indent: int = Field(
+        default=0,
+        help="",
+    )
     environment: dict = Field(
         default={},
         help="",
     )
     # log_stdin: bool = Field(default=True)
-    system: bool = Field(help='Execute command in "system" mode', default=False)
-    load_json: bool = Field(help="Load JSON from output", default=False)
+    system: bool = Field(
+        help='Execute command in "system" mode',
+        default=False,
+    )
+    load_json: bool = Field(
+        help="Load JSON from output",
+        default=False,
+    )
 
-    @property
-    def system(self):
-        """ """
-        tmp = self.__dict__.get("system", False)
-        if tmp:
-            if self.stdin or self.interactive:
-                err = f"{self} `system` cannot be used with `stdin`/`interactive`"
-                LOGGER.critical(err)
-                raise ValueError(err)
+    # @property
+    # def system(self):
+    #     """ """
+    #     tmp = self.__dict__.get("system", False)
+    #     if tmp:
+    #         if self.stdin or self.interactive:
+    #             err = f"{self} `system` cannot be used with `stdin`/`interactive`"
+    #             LOGGER.critical(err)
+    #             raise ValueError(err)
 
     def __rich_console__(self, _console, options):  # noqa
         """
@@ -84,28 +98,34 @@ class Invocation(BaseModel):
     def __call__(self):
         """ """
         if self.command_logger:
-            tmp_sys = f"system={self.system}" if self.system else ""
-            tmp_str = f"strict={self.strict}" if self.strict else ""
-            tmp = " ".join([tmp_sys, tmp_str]).strip() or ".."
-            tmp = f"({tmp})"
-            msg = f"Running command: {tmp}\n  {self.command}"
+            tmp = [
+                f"{attr}={getattr(self,attr)}" if getattr(self, attr, None) else ""
+                for attr in "system strict".split()
+            ]
+            tmp = " ".join(tmp).strip() if tmp else ""
+            tmp = f"({tmp})" if tmp else ""
+            msg = f"Running command: {tmp}\n  {self.command}\n"
             self.command_logger(msg)
         result = InvocationResult(**self.dict())
 
         if self.system:
             # FIXME: record `pid` and support `environment`
 
-            # proc = subprocess.call(
-            proc = subprocess.run(
-                self.command,
-                shell=True,
-                # capture_output=True,
-            )
+            # # proc = subprocess.call(
+            # proc = subprocess.run(
+            #     self.command,
+            #     shell=True,
+            #     # capture_output=True,
+            # )
+            # proc = subprocess.check_output(
+            #     self.command,
+            #     shell=True,)
             # result.update(
             #     stderr=proc.stderr.decode("utf-8"),
             #     stdout=proc.stdout.decode("utf-8"),
             # )
-            # error = os.system(self.command)
+            error = os.system(self.command)
+
             # import sys
             # proc = subprocess.Popen(
             #     self.command,
@@ -116,16 +136,19 @@ class Invocation(BaseModel):
             # for c in iter(lambda: proc.stdout.read(1), b""):
             #     sys.stdout.buffer.write(c)
             #     stdout+=c
-            error = proc.returncode > 0
+            # error = proc.returncode > 0
             result.update(
                 failed=bool(error),
                 failure=bool(error),
                 success=not bool(error),
                 succeeded=not bool(error),
-                stdout=proc.stdout.decode("utf-8"),
-                # stdout="<os.system>",
-                # stdin="<os.system>",
+                # stdout=proc.stdout.decode("utf-8"),
+                stdout="<os.system>",
+                stdin="<os.system>",
             )
+            self.output_logger and self.output_logger(result.stdout)
+            if self.strict and error:
+                raise SystemExit(error)
             return result
 
         exec_kwargs = dict(
@@ -196,7 +219,6 @@ class Invocation(BaseModel):
                 LOGGER.critical(err)
                 LOGGER.critical(result.stderr)
                 raise RuntimeError(err)
-
             try:
                 loaded_json = json.loads(result.stdout)
             except (json.decoder.JSONDecodeError,) as exc:
@@ -208,7 +230,10 @@ class Invocation(BaseModel):
             LOGGER.critical(f"\n{result.stderr}")
             raise RuntimeError()
         if self.output_logger:
-            self.output_logger(result)
+            if self.output_indent:
+                result = textwrap.indent(result.stdout, " " * self.output_indent)
+            msg = f"Command result:\n{result}"
+            self.output_logger(msg)
         return result
 
 

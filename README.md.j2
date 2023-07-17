@@ -76,14 +76,21 @@ json.loads(req.json())
 for k,v in req.dict().items():
   assert getattr(resp,k)==v
 
-# Rich console output for Invocations and InvocationResponse
-import rich
-rich.print(resp)
-
 # Pass in any loggers you want to use
+import logging
+logger = logging.getLogger()
+shil.invoke('ls /tmp', command_logger=logger.critical, output_logger=logger.warning)
+
+# Also works with rich-loggers
 from rich.console import Console 
 console = Console(stderr=True)
 shil.invoke('ls /tmp', command_logger=console.log)
+
+# Rich-console output for `Invocation` and `InvocationResponse`
+import rich
+rich.print(req)
+rich.print(resp)
+
 
 # Instantiate a `Runner` to stay DRY
 console=Console(stderr=True)
