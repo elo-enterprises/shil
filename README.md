@@ -12,7 +12,7 @@
     <td>
       Shell-util library for python.  Includes helpers for subprocess invocation, shell-formatters / pretty-printers, and more.
       <br/><br/>
-      <a href=https://pypi.python.org/pypi/shil/><img src=""https://img.shields.io/pypi/l/shil.svg"></a>
+      <a href=https://pypi.python.org/pypi/shil/><img src="https://img.shields.io/pypi/l/shil.svg"></a>
       <a href="https://github.com/elo-enterprises/shil/actions/workflows/python-test.yml"><img src="https://github.com/elo-enterprises/shil/actions/workflows/python-test.yml/badge.svg"></a>
     </td>
   </tr>
