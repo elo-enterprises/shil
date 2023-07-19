@@ -22,7 +22,7 @@
 ---------------------------------------------------------------------------------
 
   * [Overview](#overview)
-    * [Features](#features)
+  * [Features](#features)
   * [Installation](#installation)
   * [Usage](#usage)
     * [OOP-style Dispatch](#oop-style-dispatch)
@@ -40,11 +40,11 @@
 
 The `shil` library provides various shell-utilities for python.
 
-### Features
+## Features
 
 * Helpers for subprocess invocation
 * Shell-formatters / pretty-printers
-* A somewhat usable parser / grammer for bash
+* A somewhat usable parser / grammar for bash
 * Console support for [rich](https://rich.readthedocs.io/en/stable/index.html) & [rich protocols](https://rich.readthedocs.io/en/stable/protocol.html)
 
 
