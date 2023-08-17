@@ -6,7 +6,7 @@
     // defaults; these are included anyway
     // 'globals', 'render', 'gen', 'project', 'plugins',
     // 'jinja', 'json', 'git', 'core', 'gripe',
-
+    "python-cli",
     // Recommended for projects with source-code
     "docs", "src", "tests", "github",
 
