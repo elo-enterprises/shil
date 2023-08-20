@@ -2,13 +2,13 @@
 """
 
 from fleks import app, cli
-from fleks.util import lme
+from fleks.util import lme, typing
 
 from . import fmt
-
+from pathlib import Path
 LOGGER = lme.get_logger(__name__)
 
-@cli.click.group
+@cli.click.group(name=Path(__file__).parents[0].name)
 def entry():
     """CLI tool for `shil` library"""
 
@@ -21,6 +21,18 @@ def invoke(
     rich:bool=False,
     ) -> None:
     """Invocation tool for (line-oriented) bash"""
+
+def report(output, rich=False) -> None:
+    if rich:
+        lme.CONSOLE.print(
+            app.Syntax(
+                output,
+                "bash",
+                word_wrap=True,
+            )
+        )
+    else:
+        print(output)
 
 
 @entry.command(name='fmt')
@@ -42,18 +54,6 @@ def _fmt(
         LOGGER.warning(f"input @ {filename} is not a file; parsing as string")
         text = filename
     return report(fmt(text),rich=rich)
-
-def report(output, rich=False) -> None:
-    if rich:
-        lme.CONSOLE.print(
-            app.Syntax(
-                output,
-                "bash",
-                word_wrap=True,
-            )
-        )
-    else:
-        print(output)
 
 
 if __name__ == "__main__":
