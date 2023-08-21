@@ -65,20 +65,27 @@ See also:
 
 This uses `shil.Invocation` and returns `shil.InvocationResponse`.
 
-```
-import shil 
-req = cmd = shil.Invocation(command='ls /tmp')
-resp = cmd()
-print(resp.stdout)
+```python
+
+>>> import shil 
+>>> req = cmd = shil.Invocation(command='printf hello-world\n')
+>>> resp = cmd()
+>>> print(resp.stdout)
+hello-world
+>>>
 ```
 
 ### Functional approach to dispatch
 
 Use `shil.invoke`, get back `shil.InvocationResponse` 
 
-```
-import shil 
-resp = shil.invoke('ls /tmp')
+```python
+
+>>> import shil 
+>>> resp = shil.invoke(command='printf hello-world\n')
+>>> print(resp.stdout)
+hello-world
+>>>
 ```
 
 ### Loading data when command-output is JSON

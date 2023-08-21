@@ -52,7 +52,7 @@ The `shil` library provides various shell-utilities for python.
 
 See [pypi](https://pypi.org/project/shil/) for available releases.
 
-```
+```bash
 pip install shil
 ```
 
@@ -70,11 +70,14 @@ See also:
 
 This uses `shil.Invocation` and returns `shil.InvocationResponse`.
 
-```
-import shil 
-req = cmd = shil.Invocation(command='ls /tmp')
-resp = cmd()
-print(resp.stdout)
+```python
+
+>>> import shil 
+>>> req = cmd = shil.Invocation(command='printf hello-world\n')
+>>> resp = cmd()
+>>> print(resp.stdout)
+hello-world
+>>>
 ```
 
 ### Functional approach to dispatch
