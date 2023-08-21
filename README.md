@@ -1,20 +1,18 @@
 <table>
   <tr>
-    <td colspan=2><strong>
-    shil
-      </strong>&nbsp;&nbsp;&nbsp;&nbsp;
-      <small><small>
-      </small></small>
+    <td colspan=2>
+      <strong><u>shil</u></strong>&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href=https://pypi.python.org/pypi/shil/><img src="https://img.shields.io/pypi/l/shil.svg"></a>
+      <a href=https://pypi.python.org/pypi/shil/><img src="https://badge.fury.io/py/shil.svg"></a>
+      <a href="https://github.com/elo-enterprises/shil/actions/workflows/python-publish.yml"><img src="https://github.com/elo-enterprises/shil/actions/workflows/python-publish.yml/badge.svg"></a><a href="https://github.com/elo-enterprises/shil/actions/workflows/python-test.yml"><img src="https://github.com/elo-enterprises/shil/actions/workflows/python-test.yml/badge.svg"></a>
     </td>
   </tr>
   <tr>
     <td width=15%><img src=img/icon.png style="width:150px"></td>
     <td>
-      Shell-util library for python.  Includes helpers for subprocess invocation, shell-formatters / pretty-printers, and more.
-      <br/><br/>
-      <a href=https://pypi.python.org/pypi/shil/><img src="https://img.shields.io/pypi/l/shil.svg"></a>
-      <a href=https://pypi.python.org/pypi/shil/><img src="https://badge.fury.io/py/shil.svg"></a>
-      <a href="https://github.com/elo-enterprises/shil/actions/workflows/python-test.yml"><img src="https://github.com/elo-enterprises/shil/actions/workflows/python-test.yml/badge.svg"></a>
+      Shell-util library for python.  <br/>
+      Includes helpers for subprocess invocation, shell-formatters / pretty-printers, and more.
+      <br/>
     </td>
   </tr>
 </table>
@@ -54,7 +52,7 @@ The `shil` library provides various shell-utilities for python.
 
 See [pypi](https://pypi.org/project/shil/) for available releases.
 
-```
+```bash
 pip install shil
 ```
 
@@ -72,11 +70,14 @@ See also:
 
 This uses `shil.Invocation` and returns `shil.InvocationResponse`.
 
-```
-import shil 
-req = cmd = shil.Invocation(command='ls /tmp')
-resp = cmd()
-print(resp.stdout)
+```python
+
+>>> import shil 
+>>> req = cmd = shil.Invocation(command='printf hello-world\n')
+>>> resp = cmd()
+>>> print(resp.stdout)
+hello-world
+>>>
 ```
 
 ### Functional approach to dispatch
