@@ -90,71 +90,76 @@ hello-world
 
 ### Loading data when command-output is JSON
 
-```
-import shil 
-req = cmd = shil.Invocation(command='echo {"foo":"bar"}')
-resp = cmd()
-print(resp.data)
-assert type(resp.data) == type({})
-assert resp.data['foo']=='bar'
+```python
+>>> import shil 
+>>> cmd = shil.Invocation(command="""echo '{"foo":"bar"}'""", load_json=True)
+>>> resp = cmd()
+>>> print(resp.data)
+{'foo': 'bar'}
+>>> assert type(resp.data) == type({})
+>>> assert resp.data['foo'] == 'bar'
+>>>
 ```
 
 ### Serialization with Pydantic
 
-```
-import shil 
-import json
-req = cmd = shil.Invocation(command='echo {"foo":"bar"}')
-resp = cmd()
-json.loads(resp.json())
-json.loads(req.json())
-for k,v in req.dict().items():
-  assert getattr(resp,k)==v
+```python
+>>> import json, shil 
+>>> req = cmd = shil.Invocation(command="""echo pipes-are-allowed|grep allowed""")
+>>> resp = cmd()
+>>> keys = resp.dict().keys()
+>>> expected = 'stdout stderr failed failure success succeeded data'.split()
+>>> assert all([k in keys for k in expected])
+>>>
 ```
 
 ### Caller determines logging 
 
 Works like this with basic logger:
 
-```
-import shil 
-import logging
-logger = logging.getLogger()
-shil.invoke('ls /tmp', command_logger=logger.critical, output_logger=logger.warning)
+```python
+>>> import logging, shil 
+>>> logger = logging.getLogger()
+>>> resp = shil.invoke('ls /tmp', command_logger=logger.critical, output_logger=logger.warning)
+>>>
 ```
 
 Supports using [rich-logger](https://rich.readthedocs.io/en/stable/logging.html) too:
 
-```
-import shil 
-from rich.console import Console 
-console = Console(stderr=True)
-shil.invoke('ls /tmp', command_logger=console.log)
+```python
+>>> import shil 
+>>> from rich.console import Console 
+>>> console = Console(stderr=True)
+>>> resp = shil.invoke('ls /tmp', command_logger=console.log)
+>>>
 ```
 
 ### Rich-console Support
 
-Besides using rich-logger as above, you can use the [rich-protocol](https://rich.readthedocs.io/en/stable/protocol.html) more directly.  Printing works the way you'd expect for `Invocation` and `InvocationResponse`.
+Besides using rich-logger as above, you can use the [rich-protocol](https://rich.readthedocs.io/en/stable/protocol.html) more directly.  
 
-```
-import shil 
+Printing works the way you'd expect for `Invocation` and `InvocationResponse`.
+
+```python
+import shil, rich
 req = cmd = shil.Invocation(command='echo {"foo":"bar"}')
 resp = cmd()
-import rich
 rich.print(req)
 rich.print(resp)
 ```
 
+![rich console](img/rich-1.png)
 
 ### Stay DRY with Runners
 
 Runner's are basically just [partials](https://en.wikipedia.org/wiki/Partial_application) on `shil.invoke`.  It's simple but this can help reduce copying around repetitive configuration.
 
-```
-from rich.console import Console 
-console=Console(stderr=True)
-runner = shil.Runner(
-  output_logger=console.log,
-  command_logger=console.log)
-runner('ls /tmp')
+```python
+>>> import shil 
+>>> from rich.console import Console 
+>>> console=Console(stderr=True)
+>>> runner = shil.Runner(output_logger=console.log, command_logger=console.log)
+>>> resp = runner('ls /tmp')
+>>> assert isinstance(resp,(shil.InvocationResult,))
+>>>
 ```

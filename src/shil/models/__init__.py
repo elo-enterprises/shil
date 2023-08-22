@@ -212,7 +212,7 @@ class Invocation(BaseModel):
         result.succeeded = not result.failed
         result.success = result.succeeded
         result.failure = result.failed
-        result.data = loaded_json = None
+        result.data = None
         if self.load_json:
             if result.failed:
                 err = f"Command @ {self.command} did not succeed; cannot return JSON from failure!"
@@ -220,9 +220,9 @@ class Invocation(BaseModel):
                 LOGGER.critical(result.stderr)
                 raise RuntimeError(err)
             try:
-                loaded_json = json.loads(result.stdout)
+                result.data = json.loads(result.stdout)
             except (json.decoder.JSONDecodeError,) as exc:
-                loaded_json = dict(error=str(exc))
+                result.data = dict(error=str(exc))
 
         if self.strict and not result.succeeded:
             LOGGER.critical(f"Invocation failed and strict={self.strict}")
