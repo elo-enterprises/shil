@@ -154,10 +154,7 @@ Besides using rich-logger as above, you can use the [rich-protocol](https://rich
 Printing works the way you'd expect for `Invocation` and `InvocationResponse`.
 
 ```python
-import rich
-
-import shil
-
+import shil, rich
 req = cmd = shil.Invocation(command='echo {"foo":"bar"}')
 resp = cmd()
 rich.print(req)
@@ -165,6 +162,7 @@ rich.print(resp)
 ```
 
 ![rich console](img/rich-1.png)
+![rich console](img/rich-2.png)
 
 ### Stay DRY with Runners
 
