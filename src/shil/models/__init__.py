@@ -86,9 +86,11 @@ class Invocation(BaseModel):
         ]
         extras = " ".join(extras)
         yield self.command
+
+        indicator = "⌛ "
         yield console.Panel(
             f"[bold gold3]$ [dim italic pale_green3]{fmt}",
-            title=(f"{self.__class__.__name__} {extras}"),
+            title=(indicator + f"{self.__class__.__name__} {extras}"),
             title_align="left",
             style=console.Style(bgcolor="grey19"),
             subtitle=console.Text("not executed yet", style="yellow"),
@@ -212,7 +214,7 @@ class Invocation(BaseModel):
         result.succeeded = not result.failed
         result.success = result.succeeded
         result.failure = result.failed
-        result.data = loaded_json = None
+        result.data = None
         if self.load_json:
             if result.failed:
                 err = f"Command @ {self.command} did not succeed; cannot return JSON from failure!"
@@ -220,9 +222,9 @@ class Invocation(BaseModel):
                 LOGGER.critical(result.stderr)
                 raise RuntimeError(err)
             try:
-                loaded_json = json.loads(result.stdout)
+                result.data = json.loads(result.stdout)
             except (json.decoder.JSONDecodeError,) as exc:
-                loaded_json = dict(error=str(exc))
+                result.data = dict(error=str(exc))
 
         if self.strict and not result.succeeded:
             LOGGER.critical(f"Invocation failed and strict={self.strict}")
@@ -259,14 +261,16 @@ class InvocationResult(Invocation):
             if self.succeeded is None:
                 return "??"
             else:
-                return "[cyan]🠦 [green]ok" if self.succeeded else "[red]failed"
+                return "[cyan] [green]succeeded" if self.succeeded else "[red]failed"
 
         fmt = shfmt(self.command)
         stcol = "[bold pale_green3]" if self.succeeded else "[red3]"
+        indicator = "🟢 " if self.succeeded else "🟡 "
         yield console.Panel(
-            f"[bold gold3]$ [dim]{fmt.strip()}\n{stcol} 🠦 [dim italic pale_green3]{self.stdout}",
+            f"[bold gold3]$ [dim]{fmt.strip()}\n{stcol} → [dim italic pale_green3]{self.stdout}",
             title=(
-                f"{self.__class__.__name__} from " f"pid {self.pid} {status_string()}"
+                indicator
+                + f"{self.__class__.__name__} from pid {self.pid} {status_string()}"
             ),
             style=console.Style(bgcolor="grey19"),
             title_align="left",
