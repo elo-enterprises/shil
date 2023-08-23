@@ -6,44 +6,50 @@ from pathlib import Path
 from fleks import app, cli
 from fleks.util import lme
 
-from . import fmt
+from . import fmt, invoke
 
 LOGGER = lme.get_logger(__name__)
+DEFAULT_INPUT_FILE = "/dev/stdin"
 
+rich_flag=cli.click.flag("--rich", help="use rich output")
 
 @cli.click.group(name=Path(__file__).parents[0].name)
 def entry():
-    """CLI tool for `shil` library"""
+    """
+    CLI tool for `shil` library
+    """
 
-
-DEFAULT_INPUT_FILE = "/dev/stdin"
-
-
-# @cli.click.argument("filename", default=DEFAULT_INPUT_FILE)
 @cli.click.flag("--rich", help="use rich output")
-@entry.command
-def invoke(
+@cli.click.argument('cmd')
+@entry.command(name='invoke')
+def _invoke(
     rich: bool = False,
+    cmd:str='echo'
 ) -> None:
     """Invocation tool for (line-oriented) bash"""
-
-
+    return report(invoke(command=cmd,), rich=rich)
+    
 def report(output, rich=False) -> None:
     if rich:
+        should_rich=(hasattr(output,'__rich__') or hasattr(output,'__rich_console__'))
         lme.CONSOLE.print(
-            app.Syntax(
-                output,
+            output if should_rich else app.Syntax(
+                f"{output}",
                 "bash",
                 word_wrap=True,
             )
         )
     else:
-        print(output)
-
+        if hasattr(output,'json'):
+            import json 
+            print(json.dumps(json.loads(output.json(exclude_none=True)),indent=2))
+        else:
+            print(f"{output}")
+        # print(output)
 
 @entry.command(name="fmt")
 @cli.click.argument("filename", default=DEFAULT_INPUT_FILE)
-@cli.click.flag("--rich", help="use rich output")
+@rich_flag
 def _fmt(
     filename: str = DEFAULT_INPUT_FILE,
     rich: bool = False,

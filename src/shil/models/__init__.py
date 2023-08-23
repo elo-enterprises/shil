@@ -264,10 +264,10 @@ class InvocationResult(Invocation):
                 return "[cyan] [green]succeeded" if self.succeeded else "[red]failed"
 
         fmt = shfmt(self.command)
-        stcol = "[bold pale_green3]" if self.succeeded else "[red3]"
+        output_style = "[bold pale_green3]" if self.succeeded else "[red3]"
         indicator = "🟢 " if self.succeeded else "🟡 "
         yield console.Panel(
-            f"[bold gold3]$ [dim]{fmt.strip()}\n{stcol} → [dim italic pale_green3]{self.stdout}",
+            f"[bold gold3]$ [dim]{fmt.strip()}  [red]→ \n{output_style} [dim italic pale_green3]{self.stdout}",
             title=(
                 indicator
                 + f"{self.__class__.__name__} from pid {self.pid} {status_string()}"
