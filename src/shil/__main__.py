@@ -53,7 +53,7 @@ def _invoke(rich: bool = False, cmd: str = "echo") -> None:
         ),
         rich=rich,
     )
-        # print(output)
+    # print(output)
 
 
 @entry.command(name="fmt")

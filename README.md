@@ -1,7 +1,7 @@
 <table>
   <tr>
     <td colspan=2>
-      <strong><u>shil</u></strong>&nbsp;&nbsp;&nbsp;&nbsp;
+      <strong>shil</strong>&nbsp;&nbsp;&nbsp;&nbsp;
       <a href=https://pypi.org/project/shil><img src="https://img.shields.io/pypi/l/shil.svg"></a>
       <a href=https://pypi.org/project/shil><img src="https://badge.fury.io/py/shil.svg"></a>
       <a href="https://github.com/elo-enterprises/shil/actions/workflows/python-publish.yml"><img src="https://github.com/elo-enterprises/shil/actions/workflows/python-publish.yml/badge.svg"></a><a href="https://github.com/elo-enterprises/shil/actions/workflows/python-test.yml"><img src="https://github.com/elo-enterprises/shil/actions/workflows/python-test.yml/badge.svg"></a>
@@ -182,9 +182,9 @@ rich.print(resp)
 ```
 By default, output looks roughly like this:
 
-![rich console](img/rich-1.png)
+![rich console](https://raw.githubusercontent.com/elo-enterprises/shil/master/img/rich-1.png)
 <br/>
-![rich console](img/rich-2.png)
+![rich console](https://raw.githubusercontent.com/elo-enterprises/shil/master/img/rich-2.png)
 
 ### Stay DRY with Runners
 
