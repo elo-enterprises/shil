@@ -1,14 +1,14 @@
 <table>
   <tr>
     <td colspan=2>
-      <strong><u>shil</u></strong>&nbsp;&nbsp;&nbsp;&nbsp;
-      <a href=https://pypi.python.org/pypi/shil/><img src="https://img.shields.io/pypi/l/shil.svg"></a>
-      <a href=https://pypi.python.org/pypi/shil/><img src="https://badge.fury.io/py/shil.svg"></a>
+      <strong>shil</strong>&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href={{pypi.project_url}}><img src="https://img.shields.io/pypi/l/{{project.name}}.svg"></a>
+      <a href={{pypi.project_url}}><img src="https://badge.fury.io/py/{{project.name}}.svg"></a>
       {%for action in github.actions%}<a href="{{action.url}}"><img src="{{action.url}}/badge.svg"></a>{%endfor%}
     </td>
   </tr>
   <tr>
-    <td width=15%><img src=img/icon.png style="width:150px"></td>
+    <td width=15%><img src={{github.raw_url}}/master/img/icon.png style="width:150px"></td>
     <td>
       Shell-util library for python.  <br/>
       Includes helpers for subprocess invocation, shell-formatters / pretty-printers, and more.
@@ -43,11 +43,12 @@ The interface for `shil` is hopefully unsurprising, and something that's conveni
 
 The main goal is to provide an API that is simple and stable, without a ton of dependencies.
 
-```python 
+```
 >>> import shil 
 >>> proc = shil.invoke('echo hello world')
 >>> assert proc.succeeded
 >>> assert proc.stdout.strip()=='hello world'
+>>>
 ```
 
 Beyond such basics, shil includes support for [rich output](#) and uses pydantic for datastructures.
@@ -85,7 +86,6 @@ See also:
 This uses `shil.Invocation` and returns `shil.InvocationResponse`.
 
 ```python
-
 >>> import shil 
 >>> req = cmd = shil.Invocation(command='printf hello-world\n')
 >>> resp = cmd()

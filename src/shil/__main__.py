@@ -11,7 +11,8 @@ from . import fmt, invoke
 LOGGER = lme.get_logger(__name__)
 DEFAULT_INPUT_FILE = "/dev/stdin"
 
-rich_flag=cli.click.flag("--rich", help="use rich output")
+rich_flag = cli.click.flag("--rich", help="use rich output")
+
 
 @cli.click.group(name=Path(__file__).parents[0].name)
 def entry():
@@ -19,33 +20,41 @@ def entry():
     CLI tool for `shil` library
     """
 
-@cli.click.flag("--rich", help="use rich output")
-@cli.click.argument('cmd')
-@entry.command(name='invoke')
-def _invoke(
-    rich: bool = False,
-    cmd:str='echo'
-) -> None:
-    """Invocation tool for (line-oriented) bash"""
-    return report(invoke(command=cmd,), rich=rich)
-    
+
 def report(output, rich=False) -> None:
     if rich:
-        should_rich=(hasattr(output,'__rich__') or hasattr(output,'__rich_console__'))
+        should_rich = hasattr(output, "__rich__") or hasattr(output, "__rich_console__")
         lme.CONSOLE.print(
-            output if should_rich else app.Syntax(
+            output
+            if should_rich
+            else app.Syntax(
                 f"{output}",
                 "bash",
                 word_wrap=True,
             )
         )
     else:
-        if hasattr(output,'json'):
-            import json 
-            print(json.dumps(json.loads(output.json(exclude_none=True)),indent=2))
+        if hasattr(output, "json"):
+            import json
+
+            print(json.dumps(json.loads(output.json(exclude_none=True)), indent=2))
         else:
             print(f"{output}")
+
+
+@cli.click.flag("--rich", help="use rich output")
+@cli.click.argument("cmd")
+@entry.command(name="invoke")
+def _invoke(rich: bool = False, cmd: str = "echo") -> None:
+    """Invocation tool for (line-oriented) bash"""
+    return report(
+        invoke(
+            command=cmd,
+        ),
+        rich=rich,
+    )
         # print(output)
+
 
 @entry.command(name="fmt")
 @cli.click.argument("filename", default=DEFAULT_INPUT_FILE)
