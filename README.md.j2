@@ -1,7 +1,7 @@
 <table>
   <tr>
     <td colspan=2>
-      <strong>shil</strong>&nbsp;&nbsp;&nbsp;&nbsp;
+      <strong>{{project.name}}</strong>&nbsp;&nbsp;&nbsp;&nbsp;
       <a href={{pypi.project_url}}><img src="https://img.shields.io/pypi/l/{{project.name}}.svg"></a>
       <a href={{pypi.project_url}}><img src="https://badge.fury.io/py/{{project.name}}.svg"></a>
       {%for action in github.actions%}<a href="{{action.url}}"><img src="{{action.url}}/badge.svg"></a>{%endfor%}
