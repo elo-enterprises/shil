@@ -1,6 +1,7 @@
-"""
+""" shil.bin
 """
 
+from shil.__main__ import entry
 
-def entry():
-    print("hello world")
+if __name__ == "__main__":
+    entry()

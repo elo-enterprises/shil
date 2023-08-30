@@ -21,19 +21,16 @@ class Semantics:
         return ast
 
     def squote(self, ast):
-        from json import loads
-
         LOGGER.info(f"squote: {ast}")
         ast = ast.strip().lstrip()
         is_json = ast.startswith("{") and ast.strip().endswith("}")
         if is_json:
             try:
-                # tmp = loads.json5(ast)
-                tmp = loads(ast)
+                tmp = json.loads(ast)
             except:
                 is_json = False
             else:
-                LOGGER.critical(f"found json: {tmp}")
+                LOGGER.info(f"found json: {tmp}")
                 ast = json.dumps(tmp, indent=2)
             out = [x + " \\" for x in ast.split("\n")]
             out = "\n".join(out)
@@ -68,7 +65,7 @@ class Semantics:
                 skip_next = True
             else:
                 result.append(l)
-        # import IPython; IPython.embed()
+
         newp = []
         while result:
             item = result.pop(0)
@@ -76,6 +73,10 @@ class Semantics:
                 item = " ".join(item)
             newp.append(item)
         result = newp
+        # import sys
+        # with open('/dev/ttys000') as user_tty:
+        #     sys.stdin=user_tty
+        #     import IPython; IPython.embed()
         return "\n  ".join(map(str, result))
 
     def shell_command(self, ast):
@@ -90,6 +91,10 @@ class Semantics:
             return ast
         else:
             return f"'{tmp}'"
+
+    def simple_command_element(self, ast):
+        LOGGER.info(f"simple_command_element: {ast}")
+        return ast
 
     def pipeline_command(self, ast):
         LOGGER.info(f"pipeline_command: {ast}")
