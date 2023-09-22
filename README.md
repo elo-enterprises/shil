@@ -57,7 +57,7 @@ The interface for `shil` is hopefully unsurprising, and something that's conveni
 
 The main goal is to provide an API that is simple and stable, without a ton of dependencies.
 
-```
+```python
 >>> import shil 
 >>> proc = shil.invoke('echo hello world')
 >>> assert proc.succeeded
@@ -76,7 +76,7 @@ See the [API docs](#usage-api) for more detailed information.
 
 See [pypi](https://pypi.org/project/shil/) for available releases.
 
-```
+```bash
 pip install shil
 ```
 
