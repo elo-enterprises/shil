@@ -1,5 +1,6 @@
 """ shil.grammar
 """
+
 GRAMMAR = r"""@@grammar::bash
 @@comments :: /\(\*.*?\*\)/
 @@eol_comments :: /#.*?$/

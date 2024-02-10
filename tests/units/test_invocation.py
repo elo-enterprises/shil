@@ -1,6 +1,7 @@
 """
     test-suite: units
 """
+
 import os  # noqa
 
 import pytest  # noqa

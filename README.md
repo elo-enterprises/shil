@@ -19,20 +19,7 @@
 
 ---------------------------------------------------------------------------------
 
-  * [Overview](#overview)
-  * [Features](#features)
-    * [Shell-formatters / pretty-printers](#shell-formatters--pretty-printers)
-    * [Subprocess Invocation](#subprocess-invocation)
-  * [Installation](#installation)
-  * [Usage (CLI)](#usage-cli)
-  * [Usage (API)](#usage-api)
-    * [OOP-style Dispatch](#oop-style-dispatch)
-    * [Functional approach to dispatch](#functional-approach-to-dispatch)
-    * [Loading data when command-output is JSON](#loading-data-when-command-output-is-json)
-    * [Serialization with Pydantic](#serialization-with-pydantic)
-    * [Caller determines logging](#caller-determines-logging)
-    * [Rich-console Support](#rich-console-support)
-    * [Stay DRY with Runners](#stay-dry-with-runners)
+
 
 
 ---------------------------------------------------------------------------------
@@ -77,7 +64,7 @@ See the [API docs](#usage-api) for more detailed information.
 See [pypi](https://pypi.org/project/shil/) for available releases.
 
 ```bash
-pip install shil
+$ pip install shil
 ```
 
 ---------------------------------------------------------------------------------
@@ -174,7 +161,10 @@ Besides using rich-logger as above, you can use the [rich-protocol](https://rich
 Printing works the way you'd expect for `Invocation` and `InvocationResponse`.
 
 ```python
-import shil, rich
+import rich
+
+import shil
+
 req = cmd = shil.Invocation(command='echo {"foo":"bar"}')
 resp = cmd()
 rich.print(req)

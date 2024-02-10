@@ -1,8 +1,8 @@
 """ shil.__main__
 """
 
-from pathlib import Path
 import json as modjson
+from pathlib import Path
 
 from fleks import app, cli
 from fleks.util import lme
@@ -21,8 +21,6 @@ def entry():
     """
     CLI tool for `shil` library
     """
-
-
 
 
 def report(output, json: bool = False, rich: bool = False) -> None:
@@ -48,8 +46,6 @@ def report(output, json: bool = False, rich: bool = False) -> None:
             print(f"{output}")
 
 
-
-
 @rich_flag
 @json_flag
 @cli.click.argument("cmd")
@@ -58,7 +54,7 @@ def _invoke(rich: bool = False, json: bool = False, cmd: str = "echo") -> None:
     """
     Invocation tool for (line-oriented) bash
     """
-    result=invoke(
+    result = invoke(
         command=cmd,
     )
     return report(
