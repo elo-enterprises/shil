@@ -1,6 +1,7 @@
 """
     test-suite: integration
 """
+
 import os  # noqa
 import tempfile
 

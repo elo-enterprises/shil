@@ -1,5 +1,6 @@
 """ shil.models
 """
+
 import os
 import json
 import typing
@@ -274,7 +275,9 @@ class InvocationResult(Invocation):
             ),
             style=console.Style(bgcolor="grey19"),
             title_align="left",
-            subtitle=console.Text("✔", style="green")
-            if self.success
-            else console.Text("❌", style="red"),
+            subtitle=(
+                console.Text("✔", style="green")
+                if self.success
+                else console.Text("❌", style="red")
+            ),
         )

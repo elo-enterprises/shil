@@ -6,6 +6,7 @@
 
 **entrypoint:** `python -mshil` [src](src/shil/__main__.py)
 
+<hr/>
 
 
 ```
@@ -23,28 +24,29 @@ Commands:
 ```
 
 
+
+**entrypoint:** `python -mshil invoke  CMD` [src](src/shil/__main__.py)
+
 <hr/>
-
-**entrypoint:** `python -mshil invoke` [src](src/shil/__main__.py)
-
 
 
 ```
-Usage: python -m shil invoke [OPTIONS]
+Usage: python -m shil invoke [OPTIONS] CMD
 
   Invocation tool for (line-oriented) bash
 
 Options:
+  --json  use JSON output
   --rich  use rich output
   --help  Show this message and exit.
 
 ```
 
 
-<hr/>
 
 **entrypoint:** `python -mshil fmt  [FILENAME]` [src](src/shil/__main__.py)
 
+<hr/>
 
 
 ```
@@ -53,10 +55,10 @@ Usage: python -m shil fmt [OPTIONS] [FILENAME]
   Pretty-printer for (line-oriented) bash
 
 Options:
+  --json  use JSON output
   --rich  use rich output
   --help  Show this message and exit.
 
 ```
 
 
-<hr/>
