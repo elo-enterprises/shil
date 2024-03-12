@@ -1,2 +1,7 @@
+"""
+    test-suite: integration
+"""
+
+
 def test_imports():
-    assert True
+    from shil import Invocation, invoke  # noqa
