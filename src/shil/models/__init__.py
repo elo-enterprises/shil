@@ -1,5 +1,6 @@
 """ shil.models
 """
+
 import os
 import json
 import typing
@@ -76,27 +77,11 @@ class Invocation(BaseModel):
         if self.system:
             # FIXME: record `pid` and support `environment`
 
-            # proc = subprocess.call(
             proc = subprocess.run(
                 self.command,
                 shell=True,
                 # capture_output=True,
             )
-            # result.update(
-            #     stderr=proc.stderr.decode("utf-8"),
-            #     stdout=proc.stdout.decode("utf-8"),
-            # )
-            # error = os.system(self.command)
-            # import sys
-            # proc = subprocess.Popen(
-            #     self.command,
-            #     # stdout=sys.stdout,
-            #     stdout=subprocess.PIPE
-            #     )
-            # stdout=""
-            # for c in iter(lambda: proc.stdout.read(1), b""):
-            #     sys.stdout.buffer.write(c)
-            #     stdout+=c
             error = proc.returncode > 0
             result.update(
                 failed=bool(error),
@@ -150,6 +135,7 @@ class Invocation(BaseModel):
                 )
             exec_cmd = subprocess.Popen(self.command, **exec_kwargs)
             exec_cmd.wait()
+            result.update(return_code=exec_cmd.returncode),
         if exec_cmd.stdout:
             result.update(
                 stdout=(
@@ -162,6 +148,7 @@ class Invocation(BaseModel):
         else:
             exec_cmd.stdout = "<Interactive>"
             result.update(stdout="<Interactive>")
+
         if exec_cmd.stderr:
             result.update(stderr=exec_cmd.stderr.read().decode("utf-8"))
             exec_cmd.stderr.close()
@@ -245,7 +232,9 @@ class InvocationResult(Invocation):
             ),
             style=console.Style(bgcolor="grey19"),
             title_align="left",
-            subtitle=console.Text("✔", style="green")
-            if self.success
-            else console.Text("❌", style="red"),
+            subtitle=(
+                console.Text("✔", style="green")
+                if self.success
+                else console.Text("❌", style="red")
+            ),
         )

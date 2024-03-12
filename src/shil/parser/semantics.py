@@ -1,5 +1,6 @@
 """ shil.parser.semantics
 """
+
 import json
 from pathlib import Path
 

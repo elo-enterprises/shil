@@ -1,5 +1,6 @@
 """ shil.console
 """
+
 from rich.console import Console  # noqa
 from rich.panel import Panel  # noqa
 from rich.style import Style  # noqa
