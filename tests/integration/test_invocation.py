@@ -22,6 +22,9 @@ def test_rich():
     rich.print(req)
     print()
     rich.print(resp)
+def test_interactive_return_code():
+    cmd = invoke("ls", interactive=True)
+    assert cmd.return_code == 0
 
 
 def test_rich_console_command():
