@@ -2,22 +2,34 @@
   // Everything here is optional.
   // Literals only; no templating please!
   "plugins": [
-    
     // defaults; these are included anyway
-    // 'globals', 'render', 'gen', 'project', 'plugins',
-    // 'jinja', 'json', 'git', 'core', 'gripe',
-    "python-cli", "pypi",
-    // Recommended for projects with source-code
-    "docs", "src", "tests", "github",
-
-    "makefile",  // makefile parsing
-    "mermaid",   // mermaid cli
-    "griffe",    // ast tool
-    "pattern",  // replacement for scaffold, probably
+    "globals", "render", "gen", "project", "plugins",
+    "jinja", "git", "core", "github",
+    "python", "pypi", "python-api", "python-cli", "python-libcst",
+    "jinja", // projects with templated docs
   ],
   // END: top-level config
   // BEGIN: core plugins-config
-  
+  "python-libcst":{
+    // .libcst.codemod.yaml file:
+    // leave this empty to use a static one
+    // that's already present.  fill it in
+    // to have it recreated when needed and
+    // use pynchon's context for templating it
+    ".libcst.codemod.yaml": {
+      "repo_root": "{{src.root}}",
+      "generated_code_marker": "@generated",
+      "formatter": ["black", "-"],
+      "blacklist_patterns": [],
+      "modules": [
+        "libcst.codemod.commands",
+        "pynchon.codemod.commands",
+      ],
+    },
+    // "apply_hooks": ["display-modified"],
+
+
+  },
   // Config for `globals` plugin: (priority=..)
   //   All well-behaved plugins will honor values here, appending
   //   these values to whatever is set explicitly for that plugin
@@ -27,20 +39,32 @@
       ".*_version[.]py",
       "**/tests/fixtures/**",
       "**/build/lib/**",
+      "**/*.egg-info/**",      
     ],
   },
 
   // Config for `src` plugin:
   //   This provides find/search tooling, plus file-header generators, etc
   "src": {
-    "root": "src",
-    "include_patterns": ["{{src.root}}/**/*.py",],
+    "root": "{{pynchon.root}}/src",
+    "exclude_patterns": [
+      "**/pynchon/templates/scaffolds/**",
+    ],
+
+    "include_patterns": [
+        "{{src.root}}/**/*.py",
+        "{{src.root}}/**/*.j2",
+      ],
+    "headers": {},
+    "goals": [
+      // ...
+    ],
   },
 
   // Config for `tests` plugin:
   //   ...
   "tests": {
-    "root": "tests",
+    "root": "{{pynchon.root}}/tests",
     "include_patterns": ["**/*.py",],
     "suite_patterns": ["*/",],
   },
@@ -54,11 +78,22 @@
         "{{docs.root}}/**/*.md",
         "{{docs.root}}/**/*.html",
       ],
-      "apply_hooks": ["open-after"],
+      "apply_hooks": [],
+  },
+// Config for `project` plugin:
+  "project":{
+    "subproject_patterns": [],
   },
 
-  // Config for `github` plugin:
+  // END: core plugins-config
+  // BEGIN: other plugins-config
+
+    // Config for `github` plugin:
   "github": {},
+
+  // Config for `hooks` plugin:
+   "hooks": {},
+
 
   // Config for `jinja` plugin:
   // Planner for finding/rendering project .j2 files
@@ -90,7 +125,6 @@
   // `globals.exclude_patterns` will be appended.
   "fixme": {
     "exclude_patterns": [
-      "**/*.egg-info/**",
       "{{src.root}}/**/fixme/**",
       "{{src.root}}/**/fixme.py",
       "{{src.root}}/**/python/api/**",

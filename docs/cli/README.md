@@ -1,15 +1,32 @@
 
+[tooltip-package-entrypoints]: ## "Console Script Entrypoints"
+[tooltip-module-entrypoints]: ## "Module Entrypoints"
 
-## CLI for `shil`
+[Docs](../) *↔* [CLI](README.md) *↔* Console Scripts *↔* [Module Entrypoints](README.md#module-entrypoints)
+
+---------------------------------------------------
+
+## **[ℙ][tooltip-package-entrypoints]** `shil`
+
+Package-entrypoint overview for `shil`
 
 -------------------------------------------------------------------------------
 
-These are scripts/commands that ship with the package `shil`:
+
+### Package Entrypoints
+
+[Console scripts](https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point) published by package `shil`:
 
 
-### Main Entrypoints 
+No console scripts found
 
 
-* [`python -mshil`](/docs/cli/shil.md) @ [`src/shil/__main__.py`](/src/shil/__main__.py) @
+-------------------------------------------------------------------------------
+
+### Module Entrypoints
+
+[**ℳ**][tooltip-module-entrypoints] Modules inside `shil` providing __main__.py:
 
 
+
+* [`python -mshil`](/docs/cli/shil.md)  *[source](/src/shil/__main__.py)*

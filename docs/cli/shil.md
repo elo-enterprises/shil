@@ -1,15 +1,21 @@
 
+[tooltip-module-entrypoints]: ## "Module Entrypoints"
+[tooltip-package-entrypoints]: ## "Console Script Entrypoint"
 
-## shil CLI
+[Docs](../) *↔* [CLI](README.md) *↔* [Console Scripts](README.md#console-scripts) *↔* **Module Entrypoints**
 
-
-
-**entrypoint:** `python -mshil` [src](src/shil/__main__.py)
-
-<hr/>
+---------------------------------------------------
 
 
-```
+## [**ℳ**][tooltip-module-entrypoints] shil
+
+[**[Module]**](README.md#module-entrypoints) `shil` publishes a command line interface (*[source](/src/shil/__main__.py)*).
+
+Example usage:
+
+```bash
+$ python -mshil --help
+
 Usage: python -m shil [OPTIONS] COMMAND [ARGS]...
 
   CLI tool for `shil` library
@@ -20,45 +26,4 @@ Options:
 Commands:
   fmt     Pretty-printer for (line-oriented) bash
   invoke  Invocation tool for (line-oriented) bash
-
 ```
-
-
-
-**entrypoint:** `python -mshil invoke  CMD` [src](src/shil/__main__.py)
-
-<hr/>
-
-
-```
-Usage: python -m shil invoke [OPTIONS] CMD
-
-  Invocation tool for (line-oriented) bash
-
-Options:
-  --json  use JSON output
-  --rich  use rich output
-  --help  Show this message and exit.
-
-```
-
-
-
-**entrypoint:** `python -mshil fmt  [FILENAME]` [src](src/shil/__main__.py)
-
-<hr/>
-
-
-```
-Usage: python -m shil fmt [OPTIONS] [FILENAME]
-
-  Pretty-printer for (line-oriented) bash
-
-Options:
-  --json  use JSON output
-  --rich  use rich output
-  --help  Show this message and exit.
-
-```
-
-
