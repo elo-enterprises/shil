@@ -19,7 +19,28 @@
 
 ---------------------------------------------------------------------------------
 
-
+<div class="toc">
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#features">Features</a><ul>
+<li><a href="#shell-formatters-pretty-printers">Shell-formatters / pretty-printers</a></li>
+<li><a href="#subprocess-invocation">Subprocess Invocation</a></li>
+</ul>
+</li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage-cli">Usage (CLI)</a></li>
+<li><a href="#usage-api">Usage (API)</a><ul>
+<li><a href="#oop-style-dispatch">OOP-style Dispatch</a></li>
+<li><a href="#functional-approach-to-dispatch">Functional approach to dispatch</a></li>
+<li><a href="#loading-data-when-command-output-is-json">Loading data when command-output is JSON</a></li>
+<li><a href="#serialization-with-pydantic">Serialization with Pydantic</a></li>
+<li><a href="#caller-determines-logging">Caller determines logging</a></li>
+<li><a href="#rich-console-support">Rich-console Support</a></li>
+<li><a href="#stay-dry-with-runners">Stay DRY with Runners</a></li>
+</ul>
+</li>
+</ul>
+</div>
 
 
 ---------------------------------------------------------------------------------
@@ -40,12 +61,12 @@ The `shil` library provides various shell-utilities for python.
 ### Subprocess Invocation
 
 There's a lot of shell-related libraries out there, especially for invocation (see for example [this list](https://www.pyinvoke.org/prior-art.html)).
-The interface for `shil` is hopefully unsurprising, and something that's convenient but not fancy.  It's a utility, and not a huge framework.  
+The interface for `shil` is hopefully unsurprising, and something that's convenient but not fancy.  It's a utility, and not a huge framework.
 
 The main goal is to provide an API that is simple and stable, without a ton of dependencies.
 
-```python
->>> import shil 
+```pycon
+>>> import shil
 >>> proc = shil.invoke('echo hello world')
 >>> assert proc.succeeded
 >>> assert proc.stdout.strip()=='hello world'
@@ -54,7 +75,7 @@ The main goal is to provide an API that is simple and stable, without a ton of d
 
 Beyond such basics, shil includes support for [rich output](#) and uses pydantic for datastructures.
 
-See the [API docs](#usage-api) for more detailed information.  
+See the [API docs](#usage-api) for more detailed information.
 
 
 ---------------------------------------------------------------------------------
@@ -82,12 +103,12 @@ See also:
 * [the unit-tests](tests/units) for some examples of library usage
 * [the smoke-tests](tests/smoke/test.sh) for example usage of stand-alone scripts
 
-### OOP-style Dispatch 
+### OOP-style Dispatch
 
 This uses `shil.Invocation` and returns `shil.InvocationResponse`.
 
-```python
->>> import shil 
+```pycon
+>>> import shil
 >>> req = cmd = shil.Invocation(command='printf hello-world\n')
 >>> resp = cmd()
 >>> print(resp.stdout)
@@ -97,11 +118,10 @@ hello-world
 
 ### Functional approach to dispatch
 
-Use `shil.invoke`, get back `shil.InvocationResponse` 
+Use `shil.invoke`, get back `shil.InvocationResponse`
 
-```python
-
->>> import shil 
+```pycon
+>>> import shil
 >>> resp = shil.invoke(command='printf hello-world\n')
 >>> print(resp.stdout)
 hello-world
@@ -110,8 +130,8 @@ hello-world
 
 ### Loading data when command-output is JSON
 
-```python
->>> import shil 
+```pycon
+>>> import shil
 >>> cmd = shil.Invocation(command="""echo '{"foo":"bar"}'""", load_json=True)
 >>> resp = cmd()
 >>> print(resp.data)
@@ -123,8 +143,8 @@ hello-world
 
 ### Serialization with Pydantic
 
-```python
->>> import json, shil 
+```pycon
+>>> import json, shil
 >>> req = cmd = shil.Invocation(command="""echo pipes-are-allowed|grep allowed""")
 >>> resp = cmd()
 >>> keys = resp.dict().keys()
@@ -133,12 +153,12 @@ hello-world
 >>>
 ```
 
-### Caller determines logging 
+### Caller determines logging
 
 Works like this with basic logger:
 
-```python
->>> import logging, shil 
+```pycon
+>>> import logging, shil
 >>> logger = logging.getLogger()
 >>> resp = shil.invoke('ls /tmp', command_logger=logger.critical, output_logger=logger.warning)
 >>>
@@ -146,9 +166,9 @@ Works like this with basic logger:
 
 Supports using [rich-logger](https://rich.readthedocs.io/en/stable/logging.html) too:
 
-```python
->>> import shil 
->>> from rich.console import Console 
+```pycon
+>>> import shil
+>>> from rich.console import Console
 >>> console = Console(stderr=True)
 >>> resp = shil.invoke('ls /tmp', command_logger=console.log)
 >>>
@@ -156,19 +176,16 @@ Supports using [rich-logger](https://rich.readthedocs.io/en/stable/logging.html)
 
 ### Rich-console Support
 
-Besides using rich-logger as above, you can use the [rich-protocol](https://rich.readthedocs.io/en/stable/protocol.html) more directly.  
+Besides using rich-logger as above, you can use the [rich-protocol](https://rich.readthedocs.io/en/stable/protocol.html) more directly.
 
 Printing works the way you'd expect for `Invocation` and `InvocationResponse`.
 
-```python
-import rich
-
-import shil
-
-req = cmd = shil.Invocation(command='echo {"foo":"bar"}')
-resp = cmd()
-rich.print(req)
-rich.print(resp)
+```pycon
+>>> import shil, rich
+>>> req = cmd = shil.Invocation(command='echo {"foo":"bar"}')
+>>> resp = cmd()
+>>> rich.print(req)
+>>> rich.print(resp)
 ```
 By default, output looks roughly like this:
 
@@ -180,9 +197,9 @@ By default, output looks roughly like this:
 
 Runner's are basically just [partials](https://en.wikipedia.org/wiki/Partial_application) on `shil.invoke`.  It's simple but this can help reduce copying around repetitive configuration.
 
-```python
->>> import shil 
->>> from rich.console import Console 
+```pycon
+>>> import shil
+>>> from rich.console import Console
 >>> console=Console(stderr=True)
 >>> runner = shil.Runner(output_logger=console.log, command_logger=console.log)
 >>> resp = runner('ls /tmp')
