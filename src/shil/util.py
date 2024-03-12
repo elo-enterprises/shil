@@ -8,10 +8,6 @@ from fleks.util import lme
 LOGGER = lme.get_logger(__name__)
 
 
-def Runner(**kwargs):
-    return functools.partial(invoke, **kwargs)
-
-
 def invoke(*args, **kwargs):
     """ """
     from shil.models import Invocation
@@ -26,3 +22,7 @@ def invoke(*args, **kwargs):
     # LOGGER.critical(kwargs)
     cmd = Invocation(**kwargs)
     return cmd()
+
+
+def Runner(**kwargs):
+    return functools.partial(invoke, **kwargs)

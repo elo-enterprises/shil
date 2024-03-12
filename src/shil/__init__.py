@@ -3,7 +3,7 @@
 
 from fleks.util import lme
 
-from .models import Invocation  # noqa
+from .models import Invocation, InvocationResult  # noqa
 from .parser import fmt, shfmt  # noqa
 from .util import Runner, invoke  # noqa
 

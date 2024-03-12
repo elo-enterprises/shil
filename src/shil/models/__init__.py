@@ -4,6 +4,7 @@
 import os
 import json
 import typing
+import textwrap
 import subprocess
 
 import pydantic
@@ -12,15 +13,18 @@ from fleks.util import lme
 from shil import console
 from shil.parser import shfmt
 
+from .base import BaseModel
+
 LOGGER = lme.get_logger(__name__)
 
 Field = pydantic.Field
 
-from .base import BaseModel
-
 
 class Invocation(BaseModel):
-    command: typing.Optional[str] = Field(help="")
+    command: typing.Optional[str] = Field(
+        help="Command to run",
+        required=True,
+    )
     stdin: typing.Optional[str] = Field(default=None, help="stdin to send to command")
     strict: bool = Field(
         default=False,
@@ -44,39 +48,72 @@ class Invocation(BaseModel):
         default=None,
         help="",
     )
+    output_indent: int = Field(
+        default=0,
+        help="",
+    )
     environment: dict = Field(
         default={},
         help="",
     )
     # log_stdin: bool = Field(default=True)
-    system: bool = Field(help='Execute command in "system" mode', default=False)
-    load_json: bool = Field(help="Load JSON from output", default=False)
+    system: bool = Field(
+        help='Execute command in "system" mode',
+        default=False,
+    )
+    load_json: bool = Field(
+        help="Load JSON from output",
+        default=False,
+    )
 
-    @property
-    def system(self):
-        """ """
-        tmp = self.__dict__.get("system", False)
-        if tmp:
-            if self.stdin or self.interactive:
-                err = f"{self} `system` cannot be used with `stdin`/`interactive`"
-                LOGGER.critical(err)
-                raise ValueError(err)
-                # assert not self.stdin and not self.interactive
+    # @property
+    # def system(self):
+    #     """ """
+    #     tmp = self.__dict__.get("system", False)
+    #     if tmp:
+    #         if self.stdin or self.interactive:
+    #             err = f"{self} `system` cannot be used with `stdin`/`interactive`"
+    #             LOGGER.critical(err)
+    #             raise ValueError(err)
+
+    def __rich_console__(self, _console, options):  # noqa
+        """
+        https://rich.readthedocs.io/en/stable/protocol.html
+        """
+        fmt = shfmt(self.command)
+        extras = [
+            f"[yellow]{attr}=1" if getattr(self, attr, None) else ""
+            for attr in "system stdin interactive strict".split()
+        ]
+        extras = " ".join(extras)
+        yield self.command
+
+        indicator = "⌛ "
+        yield console.Panel(
+            f"[bold gold3]$ [dim italic pale_green3]{fmt}",
+            title=(indicator + f"{self.__class__.__name__} {extras}"),
+            title_align="left",
+            style=console.Style(bgcolor="grey19"),
+            subtitle=console.Text("not executed yet", style="yellow"),
+        )
+        # assert not self.stdin and not self.interactive
 
     def __call__(self):
         """ """
         if self.command_logger:
-            tmp_sys = f"system={self.system}" if self.system else ""
-            tmp_str = f"strict={self.strict}" if self.strict else ""
-            tmp = " ".join([tmp_sys, tmp_str]).strip() or ".."
-            tmp = f"({tmp})"
-            msg = f"Running command: {tmp}\n  {self.command}"
+            tmp = [
+                f"{attr}={getattr(self,attr)}" if getattr(self, attr, None) else ""
+                for attr in "system strict".split()
+            ]
+            tmp = " ".join(tmp).strip() if tmp else ""
+            tmp = f"({tmp})" if tmp else ""
+            msg = f"Running command: {tmp}\n  {self.command}\n"
             self.command_logger(msg)
         result = InvocationResult(**self.dict())
 
         if self.system:
             # FIXME: record `pid` and support `environment`
-
+            # error = os.system(self.command)
             proc = subprocess.run(
                 self.command,
                 shell=True,
@@ -88,10 +125,13 @@ class Invocation(BaseModel):
                 failure=bool(error),
                 success=not bool(error),
                 succeeded=not bool(error),
-                stdout=proc.stdout.decode("utf-8"),
-                # stdout="<os.system>",
-                # stdin="<os.system>",
+                # stdout=proc.stdout.decode("utf-8"),
+                stdout="<os.system>",
+                stdin="<os.system>",
             )
+            self.output_logger and self.output_logger(result.stdout)
+            if self.strict and error:
+                raise SystemExit(error)
             return result
 
         exec_kwargs = dict(
@@ -157,18 +197,17 @@ class Invocation(BaseModel):
         result.succeeded = not result.failed
         result.success = result.succeeded
         result.failure = result.failed
-        result.data = loaded_json = None
+        result.data = None
         if self.load_json:
             if result.failed:
                 err = f"Command @ {self.command} did not succeed; cannot return JSON from failure!"
                 LOGGER.critical(err)
                 LOGGER.critical(result.stderr)
                 raise RuntimeError(err)
-
             try:
-                loaded_json = json.loads(result.stdout)
+                result.data = json.loads(result.stdout)
             except (json.decoder.JSONDecodeError,) as exc:
-                loaded_json = dict(error=str(exc))
+                result.data = dict(error=str(exc))
 
         if self.strict and not result.succeeded:
             LOGGER.critical(f"Invocation failed and strict={self.strict}")
@@ -176,27 +215,11 @@ class Invocation(BaseModel):
             LOGGER.critical(f"\n{result.stderr}")
             raise RuntimeError()
         if self.output_logger:
-            self.output_logger(result)
+            if self.output_indent:
+                result = textwrap.indent(result.stdout, " " * self.output_indent)
+            msg = f"Command result:\n{result}"
+            self.output_logger(msg)
         return result
-
-    def __rich_console__(self, _console, options):  # noqa
-        """
-        https://rich.readthedocs.io/en/stable/protocol.html
-        """
-        fmt = shfmt(self.command)
-        extras = [
-            f"[yellow]{attr}=1" if getattr(self, attr, None) else ""
-            for attr in "system stdin interactive strict".split()
-        ]
-        extras = " ".join(extras)
-        yield self.command
-        yield console.Panel(
-            f"[bold gold3]$ [dim italic pale_green3]{fmt}",
-            title=(f"{self.__class__.__name__} {extras}"),
-            title_align="left",
-            style=console.Style(bgcolor="grey19"),
-            subtitle=console.Text("not executed yet", style="yellow"),
-        )
 
 
 class InvocationResult(Invocation):
@@ -221,14 +244,16 @@ class InvocationResult(Invocation):
             if self.succeeded is None:
                 return "??"
             else:
-                return "[cyan]🠦 [green]ok" if self.succeeded else "[red]failed"
+                return "[cyan] [green]succeeded" if self.succeeded else "[red]failed"
 
         fmt = shfmt(self.command)
-        stcol = "[bold pale_green3]" if self.succeeded else "[red3]"
+        output_style = "[bold pale_green3]" if self.succeeded else "[red3]"
+        indicator = "🟢 " if self.succeeded else "🟡 "
         yield console.Panel(
-            f"[bold gold3]$ [dim]{fmt.strip()}\n{stcol} 🠦 [dim italic pale_green3]{self.stdout}",
+            f"[bold gold3]$ [dim]{fmt.strip()}  [red]→ \n{output_style} [dim italic pale_green3]{self.stdout}",
             title=(
-                f"{self.__class__.__name__} from " f"pid {self.pid} {status_string()}"
+                indicator
+                + f"{self.__class__.__name__} from pid {self.pid} {status_string()}"
             ),
             style=console.Style(bgcolor="grey19"),
             title_align="left",

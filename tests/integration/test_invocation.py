@@ -5,6 +5,7 @@
 import os  # noqa
 import tempfile
 
+import rich
 from rich.console import Console
 
 from shil import Invocation, invoke, models
@@ -15,6 +16,12 @@ import pytest  # noqa
 console = Console()
 
 
+def test_rich():
+    req = cmd = Invocation(command='echo {"foo":"bar"}')
+    resp = cmd()
+    rich.print(req)
+    print()
+    rich.print(resp)
 def test_interactive_return_code():
     cmd = invoke("ls", interactive=True)
     assert cmd.return_code == 0

@@ -19,7 +19,7 @@ digit=/\d/;
 number=/(\d)+/;
 letter=/\w/;
 strict_word = ?"[^-]([\w][.])+";
-path=?"[^-\>][^ \t\n\r\f\v\|\<\>]+";
+path=?"[^-\>][^ \t\n\r\f\v\|\<\>]+" | ?"[./\*]";
 word = qblock
     | strict_word
     | path ;
