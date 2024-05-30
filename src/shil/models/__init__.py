@@ -33,6 +33,10 @@ class Invocation(BaseModel):
     shell: typing.Optional[bool] = Field(
         help="Fail if command fails",
     )
+    decoding: typing.Optional[bool] = Field(
+        default=True,
+        help="When True, results will be decoded as utf-8",
+    )
     interactive: bool = Field(
         default=False,
         help="Interactive mode",
@@ -58,23 +62,13 @@ class Invocation(BaseModel):
     )
     # log_stdin: bool = Field(default=True)
     system: bool = Field(
-        help='Execute command in "system" mode',
+        help="Execute command with os.system, bypassing subprocess module",
         default=False,
     )
     load_json: bool = Field(
         help="Load JSON from output",
         default=False,
     )
-
-    # @property
-    # def system(self):
-    #     """ """
-    #     tmp = self.__dict__.get("system", False)
-    #     if tmp:
-    #         if self.stdin or self.interactive:
-    #             err = f"{self} `system` cannot be used with `stdin`/`interactive`"
-    #             LOGGER.critical(err)
-    #             raise ValueError(err)
 
     def __rich_console__(self, _console, options):  # noqa
         """
@@ -156,7 +150,7 @@ class Invocation(BaseModel):
             )
             result.update(
                 pid=getattr(tmp, "pid", -1),
-                stdout=tmp.stdout.decode("utf-8"),
+                stdout=tmp.stdout.decode("utf-8") if self.decoding else tmp.stdout,
                 stderr=tmp.stderr,
                 return_code=tmp.returncode,
                 failed=tmp.returncode != 0,
@@ -181,7 +175,11 @@ class Invocation(BaseModel):
                 stdout=(
                     "<LargeOutput>"
                     if self.large_output
-                    else exec_cmd.stdout.read().decode("utf-8")
+                    else (
+                        exec_cmd.stdout.read().decode("utf-8")
+                        if self.decoding
+                        else exec_cmd.stdout.read()
+                    )
                 )
             )
             exec_cmd.stdout.close()
