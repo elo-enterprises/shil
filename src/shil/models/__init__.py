@@ -30,8 +30,8 @@ class Invocation(BaseModel):
         default=False,
         help="Fail if command fails",
     )
-    shell: typing.Optional[bool] = Field(
-        help="Fail if command fails",
+    shell: str = Field(
+        help="Fail if command fails",default='bash'
     )
     decoding: typing.Optional[bool] = Field(
         default=True,
@@ -228,8 +228,8 @@ class InvocationResult(Invocation):
     failure: bool = Field(default=None, help="")
     succeeded: bool = Field(default=None, help="")
     success: bool = Field(default=None, help="")
-    stdout: str = Field(default=None, help="")
-    stderr: str = Field(default=None, help="")
+    stdout: str = Field(default="", help="")
+    stderr: str = Field(default="", help="")
     return_code: int = Field(default=-1, help="")
     pid: int = Field(default=-1, help="")
 
